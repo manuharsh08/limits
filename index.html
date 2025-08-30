@@ -175,7 +175,7 @@
     <p>
       <b>Rules:</b>
       <ul>
-        <li>You have <b>60 minutes</b> to complete 30 questions.</li>
+        <li>You have <b>30 minutes</b> to complete 30 questions.</li>
         <li>The quiz will begin in fullscreen mode to ensure fairness.</li>
         <li><b>If you exit fullscreen at any time, the quiz will be automatically submitted immediately.</b></li>
         <li><b>Tab switching is strictly prohibited.</b> If you switch tabs or change the browser window, the quiz will be automatically submitted.</li>
@@ -200,9 +200,9 @@
   <!-- Quiz Container -->
   <div class="quiz-container" id="quizContainer">
     <h2>Calculus Limits Quiz</h2>
-    <div class="timer" id="timer">Time left: 60:00</div>
+    <div class="timer" id="timer">Time left: 30:00</div>
     <div class="timer-info" id="quizTimerInfo">
-      <span id="timeAllotted">Time Allotted: 60 minutes</span>
+      <span id="timeAllotted">Time Allotted: 30 minutes</span>
     </div>
     <form id="quizForm">
       
@@ -451,7 +451,7 @@
     <div class="result" id="result"></div>
   </div>
 <script>
-  let timer = 3600; // 60 minutes in seconds
+  let timer = 1800; // 30 minutes in seconds
   let timerInterval;
   let scheduleInterval;
   let quizSubmitted = false;
@@ -481,8 +481,8 @@
   // QUIZ SCHEDULE CONFIGURATION
   // ================================
   const QUIZ_DATE = '2025-08-30';
-  const QUIZ_START_TIME = '14:00';
-  const QUIZ_ENTRY_CUTOFF = '14:05';
+  const QUIZ_START_TIME = '14:47';
+  const QUIZ_ENTRY_CUTOFF = '14:49';
   const TIMEZONE = '+05:30';
   
   const quizStartDate = new Date(`${QUIZ_DATE}T${QUIZ_START_TIME}:00${TIMEZONE}`);
