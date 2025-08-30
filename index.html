@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculus Limits Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .center-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #eaf5ea;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      user-select: none;
+    }
+    .quiz-container {
+      display: none;
+      margin: 40px auto;
+      max-width: 800px;
+      user-select: none;
+    }
+    .scheduled-message {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 20px 0;
+      color: #856404;
+    }
+    h2 {
+      color: #2e8b57;
+      user-select: none;
+    }
+    .timer {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #b22222;
+      margin-bottom: 15px;
+      user-select: none;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      padding: 10px;
+      border: 2px solid #b22222;
+      border-radius: 5px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .countdown {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #dc3545;
+      margin: 10px 0;
+    }
+    .question {
+      margin-bottom: 20px;
+      user-select: none;
+      text-align: left;
+    }
+    .feedback {
+      font-weight: bold;
+      margin-top: 5px;
+      user-select: none;
+    }
+    .correct {
+      color: #2e8b57;
+      user-select: none;
+    }
+    .incorrect {
+      color: #d2691e;
+      user-select: none;
+    }
+    .result {
+      font-weight: bold;
+      color: #2e8b57;
+      margin-top: 20px;
+      user-select: none;
+      font-size: 1.2em;
+      text-align: center;
+      padding: 15px;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 20px;
+      font-size: 1.1em;
+      padding: 10px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    button.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    ul {
+      text-align: left;
+      display: inline-block;
+      margin: 0 auto;
+      padding-left: 20px;
+      user-select: none;
+    }
+    #tabSwitchWarning {
+      font-weight: bold;
+      color: #d2691e;
+      margin-top: 15px;
+      user-select: none;
+    }
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-bottom: 15px;
+      user-select: text;
+    }
+    .math {
+      font-family: 'Times New Roman', serif;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    .timer-info {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+      color: #155724;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro Screen -->
+  <div class="center-screen" id="introScreen">
+    <h1>Welcome to the Calculus Limits Quiz</h1>
+    <p>You are about to take a quiz on <b>calculus limits</b>.</p>
+    
+    <!-- Scheduling Check -->
+    <div class="scheduled-message" id="scheduledMessage">
+      <h3>⏰ Quiz Schedule</h3>
+      <p id="scheduleWindow"><strong>Loading quiz schedule...</strong></p>
+      <p id="scheduleStatus">Checking current time...</p>
+      <div class="countdown" id="countdownTimer" style="display: none;"></div>
+    </div>
+    
+    <p>
+      <b>Rules:</b>
+      <ul>
+        <li>You have <b>60 minutes</b> to complete 30 questions.</li>
+        <li>The quiz will begin in fullscreen mode to ensure fairness.</li>
+        <li><b>If you exit fullscreen at any time, the quiz will be automatically submitted immediately.</b></li>
+        <li><b>Tab switching is strictly prohibited.</b> If you switch tabs or change the browser window, the quiz will be automatically submitted.</li>
+        <li><b>Copying of quiz content is disabled.</b></li>
+        <li><b>Inspecting or altering the page source is not allowed.</b></li>
+      </ul>
+    </p>
+    <p id="tabSwitchWarning">
+      ⚠️ This quiz is protected against cheating. Please remain on this tab and stay in fullscreen mode until you finish the quiz.
+    </p>
+    
+    <!-- Input fields for name and email -->
+    <div style="margin-top: 20px; text-align: left; max-width: 400px; width: 100%;">
+      <label for="userName" style="font-weight: bold;">Name:</label><br>
+      <input type="text" id="userName" name="userName" placeholder="Enter your full name" autocomplete="off" /><br />
+      <label for="userEmail" style="font-weight: bold;">Email Address:</label><br>
+      <input type="email" id="userEmail" name="userEmail" placeholder="Enter your email address" autocomplete="off" />
+    </div>
+    <div id="inputError" style="color: #d2691e; font-weight: bold; margin-bottom: 10px; display: none;"></div>
+    <button id="startBtn" onclick="startQuiz()" disabled>Start Quiz</button>
+  </div>
+
+  <!-- Quiz Container -->
+  <div class="quiz-container" id="quizContainer">
+    <h2>Calculus Limits Quiz</h2>
+    <div class="timer" id="timer">Time left: 60:00</div>
+    <div class="timer-info" id="quizTimerInfo">
+      <span id="timeAllotted">Time Allotted: 60 minutes</span>
+    </div>
+    <form id="quizForm">
+      
+      <div class="question" id="qdiv1">
+        <p><strong>1.</strong> What is the value of <span class="math">lim<sub>x → 2</sub> (x² - 4)/(x - 2)</span>?</p>
+        <input type="radio" name="q1" value="a" /> 0<br />
+        <input type="radio" name="q1" value="b" /> 2<br />
+        <input type="radio" name="q1" value="c" /> 4<br />
+        <input type="radio" name="q1" value="d" /> Does not exist<br />
+        <div class="feedback" id="feedback1"></div>
+      </div>
+
+      <div class="question" id="qdiv2">
+        <p><strong>2.</strong> Evaluate <span class="math">lim<sub>x → 3</sub> (x³ - 27)/(x - 3)</span></p>
+        <input type="radio" name="q2" value="a" /> 9<br />
+        <input type="radio" name="q2" value="b" /> 18<br />
+        <input type="radio" name="q2" value="c" /> 27<br />
+        <input type="radio" name="q2" value="d" /> 0<br />
+        <div class="feedback" id="feedback2"></div>
+      </div>
+
+      <div class="question" id="qdiv3">
+        <p><strong>3.</strong> Find <span class="math">lim<sub>x → 1</sub> (x⁴ - 1)/(x - 1)</span></p>
+        <input type="radio" name="q3" value="a" /> 1<br />
+        <input type="radio" name="q3" value="b" /> 2<br />
+        <input type="radio" name="q3" value="c" /> 3<br />
+        <input type="radio" name="q3" value="d" /> 4<br />
+        <div class="feedback" id="feedback3"></div>
+      </div>
+
+      <div class="question" id="qdiv4">
+        <p><strong>4.</strong> What is <span class="math">lim<sub>x → 0</sub> (√(1 + x) - 1)/x</span>?</p>
+        <input type="radio" name="q4" value="a" /> ½<br />
+        <input type="radio" name="q4" value="b" /> 1<br />
+        <input type="radio" name="q4" value="c" /> 0<br />
+        <input type="radio" name="q4" value="d" /> ∞<br />
+        <div class="feedback" id="feedback4"></div>
+      </div>
+
+      <div class="question" id="qdiv5">
+        <p><strong>5.</strong> Evaluate <span class="math">lim<sub>x → 4</sub> (√x - 2)/(x - 4)</span></p>
+        <input type="radio" name="q5" value="a" /> ¼<br />
+        <input type="radio" name="q5" value="b" /> ½<br />
+        <input type="radio" name="q5" value="c" /> ⅛<br />
+        <input type="radio" name="q5" value="d" /> 0<br />
+        <div class="feedback" id="feedback5"></div>
+      </div>
+
+      <div class="question" id="qdiv6">
+        <p><strong>6.</strong> Find <span class="math">lim<sub>x → 2</sub> (x³ - 8)/(x² - 4)</span></p>
+        <input type="radio" name="q6" value="a" /> 2<br />
+        <input type="radio" name="q6" value="b" /> 3<br />
+        <input type="radio" name="q6" value="c" /> 4<br />
+        <input type="radio" name="q6" value="d" /> 6<br />
+        <div class="feedback" id="feedback6"></div>
+      </div>
+
+      <div class="question" id="qdiv7">
+        <p><strong>7.</strong> What is <span class="math">lim<sub>x → 1</sub> (x⁵ - 1)/(x³ - 1)</span>?</p>
+        <input type="radio" name="q7" value="a" /> 5/3<br />
+        <input type="radio" name="q7" value="b" /> 3/5<br />
+        <input type="radio" name="q7" value="c" /> 1<br />
+        <input type="radio" name="q7" value="d" /> 5<br />
+        <div class="feedback" id="feedback7"></div>
+      </div>
+
+      <div class="question" id="qdiv8">
+        <p><strong>8.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> ((1 + x)ⁿ - 1)/x</span> where n is a positive integer</p>
+        <input type="radio" name="q8" value="a" /> n<br />
+        <input type="radio" name="q8" value="b" /> 1<br />
+        <input type="radio" name="q8" value="c" /> 0<br />
+        <input type="radio" name="q8" value="d" /> n!<br />
+        <div class="feedback" id="feedback8"></div>
+      </div>
+
+      <div class="question" id="qdiv9">
+        <p><strong>9.</strong> Find <span class="math">lim<sub>x → 2</sub> (√(x² + 5) - 3)/(x² - 4)</span></p>
+        <input type="radio" name="q9" value="a" /> 1/6<br />
+        <input type="radio" name="q9" value="b" /> 1/12<br />
+        <input type="radio" name="q9" value="c" /> 2/3<br />
+        <input type="radio" name="q9" value="d" /> 1/3<br />
+        <div class="feedback" id="feedback9"></div>
+      </div>
+
+      <div class="question" id="qdiv10">
+        <p><strong>10.</strong> What is <span class="math">lim<sub>x → -2</sub> (x³ + 8)/(x² - 4)</span>?</p>
+        <input type="radio" name="q10" value="a" /> 3<br />
+        <input type="radio" name="q10" value="b" /> -3<br />
+        <input type="radio" name="q10" value="c" /> 0<br />
+        <input type="radio" name="q10" value="d" /> Does not exist<br />
+        <div class="feedback" id="feedback10"></div>
+      </div>
+
+      <div class="question" id="qdiv11">
+        <p><strong>11.</strong> What is the value of <span class="math">lim<sub>x → 0</sub> (sin x)/x</span>?</p>
+        <input type="radio" name="q11" value="a" /> 0<br />
+        <input type="radio" name="q11" value="b" /> 1<br />
+        <input type="radio" name="q11" value="c" /> ∞<br />
+        <input type="radio" name="q11" value="d" /> Does not exist<br />
+        <div class="feedback" id="feedback11"></div>
+      </div>
+
+      <div class="question" id="qdiv12">
+        <p><strong>12.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> (1 - cos x)/x²</span></p>
+        <input type="radio" name="q12" value="a" /> 0<br />
+        <input type="radio" name="q12" value="b" /> ½<br />
+        <input type="radio" name="q12" value="c" /> 1<br />
+        <input type="radio" name="q12" value="d" /> 2<br />
+        <div class="feedback" id="feedback12"></div>
+      </div>
+
+      <div class="question" id="qdiv13">
+        <p><strong>13.</strong> Find <span class="math">lim<sub>x → 0</sub> (tan x)/x</span></p>
+        <input type="radio" name="q13" value="a" /> 0<br />
+        <input type="radio" name="q13" value="b" /> 1<br />
+        <input type="radio" name="q13" value="c" /> ∞<br />
+        <input type="radio" name="q13" value="d" /> ½<br />
+        <div class="feedback" id="feedback13"></div>
+      </div>
+
+      <div class="question" id="qdiv14">
+        <p><strong>14.</strong> What is <span class="math">lim<sub>x → 0</sub> (sin 3x)/x</span>?</p>
+        <input type="radio" name="q14" value="a" /> 1<br />
+        <input type="radio" name="q14" value="b" /> 3<br />
+        <input type="radio" name="q14" value="c" /> 0<br />
+        <input type="radio" name="q14" value="d" /> ⅓<br />
+        <div class="feedback" id="feedback14"></div>
+      </div>
+
+      <div class="question" id="qdiv15">
+        <p><strong>15.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> (sin 2x)/(sin 5x)</span></p>
+        <input type="radio" name="q15" value="a" /> 2/5<br />
+        <input type="radio" name="q15" value="b" /> 5/2<br />
+        <input type="radio" name="q15" value="c" /> 1<br />
+        <input type="radio" name="q15" value="d" /> 0<br />
+        <div class="feedback" id="feedback15"></div>
+      </div>
+
+      <div class="question" id="qdiv16">
+        <p><strong>16.</strong> Find <span class="math">lim<sub>x → 0</sub> (1 - cos 2x)/x²</span></p>
+        <input type="radio" name="q16" value="a" /> 1<br />
+        <input type="radio" name="q16" value="b" /> 2<br />
+        <input type="radio" name="q16" value="c" /> 4<br />
+        <input type="radio" name="q16" value="d" /> 0<br />
+        <div class="feedback" id="feedback16"></div>
+      </div>
+
+      <div class="question" id="qdiv17">
+        <p><strong>17.</strong> What is <span class="math">lim<sub>x → 0</sub> (tan 3x)/(sin 2x)</span>?</p>
+        <input type="radio" name="q17" value="a" /> 2/3<br />
+        <input type="radio" name="q17" value="b" /> 3/2<br />
+        <input type="radio" name="q17" value="c" /> 1<br />
+        <input type="radio" name="q17" value="d" /> 0<br />
+        <div class="feedback" id="feedback17"></div>
+      </div>
+
+      <div class="question" id="qdiv18">
+        <p><strong>18.</strong> Evaluate <span class="math">lim<sub>x → π/2</sub> (1 - sin x)/(cos² x)</span></p>
+        <input type="radio" name="q18" value="a" /> ½<br />
+        <input type="radio" name="q18" value="b" /> 1<br />
+        <input type="radio" name="q18" value="c" /> 2<br />
+        <input type="radio" name="q18" value="d" /> ∞<br />
+        <div class="feedback" id="feedback18"></div>
+      </div>
+
+      <div class="question" id="qdiv19">
+        <p><strong>19.</strong> Find <span class="math">lim<sub>x → 0</sub> (x sin x)/(1 - cos x)</span></p>
+        <input type="radio" name="q19" value="a" /> 0<br />
+        <input type="radio" name="q19" value="b" /> 1<br />
+        <input type="radio" name="q19" value="c" /> 2<br />
+        <input type="radio" name="q19" value="d" /> ∞<br />
+        <div class="feedback" id="feedback19"></div>
+      </div>
+
+      <div class="question" id="qdiv20">
+        <p><strong>20.</strong> What is <span class="math">lim<sub>x → 0</sub> (sin 5x - sin 3x)/x</span>?</p>
+        <input type="radio" name="q20" value="a" /> 0<br />
+        <input type="radio" name="q20" value="b" /> 2<br />
+        <input type="radio" name="q20" value="c" /> 5<br />
+        <input type="radio" name="q20" value="d" /> 8<br />
+        <div class="feedback" id="feedback20"></div>
+      </div>
+
+      <div class="question" id="qdiv21">
+        <p><strong>21.</strong> What is the value of <span class="math">lim<sub>x → 0</sub> (eˣ - 1)/x</span>?</p>
+        <input type="radio" name="q21" value="a" /> 0<br />
+        <input type="radio" name="q21" value="b" /> 1<br />
+        <input type="radio" name="q21" value="c" /> e<br />
+        <input type="radio" name="q21" value="d" /> ∞<br />
+        <div class="feedback" id="feedback21"></div>
+      </div>
+
+      <div class="question" id="qdiv22">
+        <p><strong>22.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> (aˣ - 1)/x</span> where a > 0, a ≠ 1</p>
+        <input type="radio" name="q22" value="a" /> 1<br />
+        <input type="radio" name="q22" value="b" /> a<br />
+        <input type="radio" name="q22" value="c" /> ln a<br />
+        <input type="radio" name="q22" value="d" /> eᵃ<br />
+        <div class="feedback" id="feedback22"></div>
+      </div>
+
+      <div class="question" id="qdiv23">
+        <p><strong>23.</strong> Find <span class="math">lim<sub>x → 0</sub> (e²ˣ - 1)/x</span></p>
+        <input type="radio" name="q23" value="a" /> 1<br />
+        <input type="radio" name="q23" value="b" /> 2<br />
+        <input type="radio" name="q23" value="c" /> e<br />
+        <input type="radio" name="q23" value="d" /> 2e<br />
+        <div class="feedback" id="feedback23"></div>
+      </div>
+
+      <div class="question" id="qdiv24">
+        <p><strong>24.</strong> What is <span class="math">lim<sub>x → ∞</sub> (1 + 1/x)ˣ</span>?</p>
+        <input type="radio" name="q24" value="a" /> 1<br />
+        <input type="radio" name="q24" value="b" /> e<br />
+        <input type="radio" name="q24" value="c" /> ∞<br />
+        <input type="radio" name="q24" value="d" /> 0<br />
+        <div class="feedback" id="feedback24"></div>
+      </div>
+
+      <div class="question" id="qdiv25">
+        <p><strong>25.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> (eˣ - e⁻ˣ)/x</span></p>
+        <input type="radio" name="q25" value="a" /> 0<br />
+        <input type="radio" name="q25" value="b" /> 1<br />
+        <input type="radio" name="q25" value="c" /> 2<br />
+        <input type="radio" name="q25" value="d" /> e<br />
+        <div class="feedback" id="feedback25"></div>
+      </div>
+
+      <div class="question" id="qdiv26">
+        <p><strong>26.</strong> Find <span class="math">lim<sub>x → 0</sub> ln(1 + x)/x</span></p>
+        <input type="radio" name="q26" value="a" /> 0<br />
+        <input type="radio" name="q26" value="b" /> 1<br />
+        <input type="radio" name="q26" value="c" /> ln 2<br />
+        <input type="radio" name="q26" value="d" /> e<br />
+        <div class="feedback" id="feedback26"></div>
+      </div>
+
+      <div class="question" id="qdiv27">
+        <p><strong>27.</strong> What is <span class="math">lim<sub>x → 0</sub> (e³ˣ - eˣ)/x²</span>?</p>
+        <input type="radio" name="q27" value="a" /> 0<br />
+        <input type="radio" name="q27" value="b" /> 1<br />
+        <input type="radio" name="q27" value="c" /> 4<br />
+        <input type="radio" name="q27" value="d" /> ∞<br />
+        <div class="feedback" id="feedback27"></div>
+      </div>
+
+      <div class="question" id="qdiv28">
+        <p><strong>28.</strong> Evaluate <span class="math">lim<sub>x → 0</sub> (ln(1 + 2x) - ln(1 + x))/x</span></p>
+        <input type="radio" name="q28" value="a" /> 0<br />
+        <input type="radio" name="q28" value="b" /> 1<br />
+        <input type="radio" name="q28" value="c" /> 2<br />
+        <input type="radio" name="q28" value="d" /> ln 2<br />
+        <div class="feedback" id="feedback28"></div>
+      </div>
+
+      <div class="question" id="qdiv29">
+        <p><strong>29.</strong> Find <span class="math">lim<sub>x → 0</sub> (2ˣ - 1)/(3ˣ - 1)</span></p>
+        <input type="radio" name="q29" value="a" /> 2/3<br />
+        <input type="radio" name="q29" value="b" /> ln 2/ln 3<br />
+        <input type="radio" name="q29" value="c" /> 1<br />
+        <input type="radio" name="q29" value="d" /> 3/2<br />
+        <div class="feedback" id="feedback29"></div>
+      </div>
+
+      <div class="question" id="qdiv30">
+        <p><strong>30.</strong> What is <span class="math">lim<sub>x → 0</sub> (e³ˣ - e²ˣ)/x</span>?</p>
+        <input type="radio" name="q30" value="a" /> 0<br />
+        <input type="radio" name="q30" value="b" /> 1<br />
+        <input type="radio" name="q30" value="c" /> 5<br />
+        <input type="radio" name="q30" value="d" /> e<br />
+        <div class="feedback" id="feedback30"></div>
+      </div>
+
+      <button type="button" id="submitBtn" onclick="checkAnswers()">Submit Answers</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
+
+<script>
+  let timer = 3600; // 60 minutes in seconds
+  let timerInterval;
+  let scheduleInterval;
+  let quizSubmitted = false;
+  
+  // ================================
+  // QUIZ SCHEDULE CONFIGURATION
+  // ================================
+  const QUIZ_DATE = '2025-08-30';
+  const QUIZ_START_TIME = '09:35';
+  const QUIZ_ENTRY_CUTOFF = '09:40';
+  const TIMEZONE = '+05:30';
+  
+  const quizStartDate = new Date(`${QUIZ_DATE}T${QUIZ_START_TIME}:00${TIMEZONE}`);
+  const lastStartDate = new Date(`${QUIZ_DATE}T${QUIZ_ENTRY_CUTOFF}:00${TIMEZONE}`);
+  
+  // Format time for display
+  function formatTime(date) {
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+  }
+  
+  function formatDate(date) {
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric',
+      month: 'long', 
+      day: 'numeric'
+    });
+  }
+  
+  // Update schedule window display
+  function updateScheduleDisplay() {
+    const scheduleWindow = document.getElementById('scheduleWindow');
+    scheduleWindow.innerHTML = `<strong>Quiz Window: ${formatDate(quizStartDate)} from ${formatTime(quizStartDate)} to ${formatTime(lastStartDate)}</strong>`;
+  }
+  
+  // Check if quiz is available and update countdown
+  function checkSchedule() {
+    const now = new Date();
+    const scheduleStatus = document.getElementById('scheduleStatus');
+    const startBtn = document.getElementById('startBtn');
+    const countdownTimer = document.getElementById('countdownTimer');
+    
+    if (now >= quizStartDate && now <= lastStartDate) {
+      // Quiz is available
+      scheduleStatus.innerHTML = '<span style="color: green;">✅ Quiz is now available!</span>';
+      countdownTimer.style.display = 'none';
+      
+      startBtn.disabled = false;
+      startBtn.style.backgroundColor = '#4CAF50';
+      startBtn.style.color = 'white';
+      
+    } else if (now > lastStartDate) {
+      // Too late to start
+      scheduleStatus.innerHTML = '<span style="color: red;">❌ Quiz start window has closed. You can no longer begin the quiz.</span>';
+      countdownTimer.style.display = 'none';
+      
+      startBtn.disabled = true;
+      startBtn.style.backgroundColor = '#ccc';
+      startBtn.style.color = '#666';
+      
+    } else {
+      // Before quiz starts - show countdown
+      const timeLeft = quizStartDate - now;
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+      
+      scheduleStatus.innerHTML = '<span style="color: red;">❌ Quiz will be available soon</span>';
+      
+      // Show live countdown
+      if (days > 0) {
+        countdownTimer.innerHTML = `⏱️ Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      } else if (hours > 0) {
+        countdownTimer.innerHTML = `⏱️ Countdown: ${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        countdownTimer.innerHTML = `⏱️ Countdown: ${minutes}m ${seconds}s`;
+      }
+      
+      countdownTimer.style.display = 'block';
+      
+      startBtn.disabled = true;
+      startBtn.style.backgroundColor = '#ccc';
+      startBtn.style.color = '#666';
+    }
+  }
+  
+  // Disable right-click anywhere
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+  });
+  
+  // Disable text selection
+  document.addEventListener('selectstart', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // Enhanced keyboard blocking function
+  function keyboardBlocker(e) {
+    const isInputField = e.target.tagName === 'INPUT' && (e.target.type === 'text' || e.target.type === 'email');
+    
+    if (
+      e.keyCode === 123 ||
+      (e.ctrlKey && e.shiftKey && e.keyCode === 73) ||
+      (e.ctrlKey && e.shiftKey && e.keyCode === 74) ||
+      (e.ctrlKey && e.keyCode === 85) ||
+      (e.ctrlKey && e.shiftKey && e.keyCode === 75) ||
+      (e.ctrlKey && e.shiftKey && e.keyCode === 67) ||
+      (e.ctrlKey && e.keyCode === 65 && !isInputField) ||
+      (e.ctrlKey && e.keyCode === 67 && !isInputField) ||
+      (e.ctrlKey && e.keyCode === 86 && !isInputField) ||
+      (e.ctrlKey && e.keyCode === 88 && !isInputField) ||
+      (e.ctrlKey && e.keyCode === 83) ||
+      (e.ctrlKey && e.keyCode === 80) ||
+      (e.altKey && e.keyCode === 115) ||
+      (e.ctrlKey && e.keyCode === 87) ||
+      (e.ctrlKey && e.keyCode === 82) ||
+      e.keyCode === 116 ||
+      (e.ctrlKey && e.keyCode === 116) ||
+      (e.ctrlKey && e.shiftKey && e.keyCode === 82)
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+    
+    if (isInputField) {
+      return true;
+    }
+    
+    if (document.getElementById('quizContainer').style.display === 'block') {
+      e.preventDefault();
+      return false;
+    }
+    
+    return true;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('keydown', keyboardBlocker, true);
+    document.addEventListener('keyup', keyboardBlocker, true);
+    
+    // Initialize schedule display
+    updateScheduleDisplay();
+    checkSchedule();
+    
+    // Update every second for live countdown
+    scheduleInterval = setInterval(checkSchedule, 1000);
+  });
+
+  function goFullScreen(elem) {
+    if (elem.requestFullscreen) elem.requestFullscreen();
+    else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+  }
+  
+  function exitFullScreen() {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+  
+  function autoSubmitQuizOnFullScreenExit() {
+    if (quizSubmitted) return;
+    alert('You exited fullscreen. The quiz will now be submitted.');
+    checkAnswers(true);
+  }
+  
+  document.addEventListener('fullscreenchange', function() {
+    if (!document.fullscreenElement && document.getElementById('quizContainer').style.display === 'block' && !quizSubmitted) {
+      autoSubmitQuizOnFullScreenExit();
+    }
+  });
+  
+  document.addEventListener('visibilitychange', function() {
+    if (!quizSubmitted && document.getElementById('quizContainer').style.display === 'block' && document.hidden) {
+      alert('You switched tabs or minimized the browser. The quiz will now be submitted.');
+      checkAnswers(true);
+    }
+  });
+  
+  function startQuiz() {
+    const now = new Date();
+    
+    if (now < quizStartDate) {
+      alert('Quiz is not yet available. Please wait until the scheduled time.');
+      return;
+    }
+    
+    if (now > lastStartDate) {
+      alert('Quiz start window has closed. You can no longer begin the quiz.');
+      return;
+    }
+    
+    const nameInput = document.getElementById('userName').value.trim();
+    const emailInput = document.getElementById('userEmail').value.trim();
+    const errorDiv = document.getElementById('inputError');
+    
+    if (nameInput === '') {
+      errorDiv.textContent = "Please enter your name.";
+      errorDiv.style.display = "block";
+      return;
+    }
+    
+    if (emailInput === '') {
+      errorDiv.textContent = "Please enter your email address.";
+      errorDiv.style.display = "block";
+      return;
+    }
+    
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailInput)) {
+      errorDiv.textContent = "Please enter a valid email address.";
+      errorDiv.style.display = "block";
+      return;
+    }
+    
+    // Stop schedule checking
+    clearInterval(scheduleInterval);
+    
+    errorDiv.style.display = "none";
+    document.getElementById('introScreen').style.display = 'none';
+    document.getElementById('quizContainer').style.display = 'block';
+    quizSubmitted = false;
+    startTimer();
+    goFullScreen(document.documentElement);
+  }
+  
+  function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timer--;
+      updateTimerDisplay();
+      if (timer <= 0) {
+        clearInterval(timerInterval);
+        if (!quizSubmitted) {
+          alert('Time\'s up!');
+          checkAnswers(true);
+        }
+      }
+    }, 1000);
+  }
+  
+  function updateTimerDisplay() {
+    const min = Math.floor(timer / 60);
+    const sec = timer % 60;
+    document.getElementById('timer').textContent =
+      `Time left: ${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    
+    const timerElement = document.getElementById('timer');
+    if (timer <= 300) { // 5 minutes
+      timerElement.style.color = '#ff0000';
+    } else if (timer <= 600) { // 10 minutes
+      timerElement.style.color = '#ff6600';
+    } else {
+      timerElement.style.color = '#b22222';
+    }
+  }
+  
+  function sendToFormspree(name, email, score, timeUsed) {
+    const endpoint = "https://formspree.io/f/xyzppvla";
+    fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ 
+        name: name, 
+        email: email, 
+        score: score, 
+        total: 30,
+        timeUsed: timeUsed,
+        submissionTime: new Date().toISOString()
+      }),
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log("Quiz result sent to Formspree.");
+      } else {
+        console.error("Formspree submission failed.");
+      }
+    })
+    .catch(error => {
+      console.error("Formspree submission error:", error);
+    });
+  }
+  
+  function checkAnswers(auto = false) {
+    if (quizSubmitted) return;
+    
+    const timeUsedMinutes = Math.floor((3600 - timer) / 60);
+    
+    const answers = ['c', 'c', 'd', 'a', 'a', 'b', 'a', 'a', 'a', 'b', 
+                     'b', 'b', 'b', 'b', 'a', 'b', 'b', 'a', 'c', 'b',
+                     'b', 'c', 'b', 'b', 'c', 'b', 'd', 'b', 'b', 'b'];
+    
+    const ansText = [
+      "4", "27", "4", "1/2", "1/4",
+      "3", "5/3", "n", "1/6", "-3",
+      "1", "1/2", "1", "3", "2/5",
+      "2", "3/2", "1/2", "2", "2",
+      "1", "ln a", "2", "e", "2",
+      "1", "∞", "1", "ln 2/ln 3", "1"
+    ];
+    
+    let score = 0;
+    let answered = 0;
+    
+    for (let i = 1; i <= 30; i++) {
+      document.getElementById('feedback' + i).innerHTML = "";
+      const radios = document.getElementsByName('q' + i);
+      let userVal = "";
+      let questionAnswered = false;
+      
+      for (const radio of radios) {
+        if (radio.checked) {
+          questionAnswered = true;
+          answered++;
+          userVal = radio.value;
+          if (radio.value === answers[i - 1]) score++;
+          break;
+        }
+      }
+      
+      if (questionAnswered) {
+        if (userVal === answers[i - 1]) {
+          document.getElementById('feedback' + i).innerHTML = "<span class='correct'>Correct!</span>";
+        } else {
+          document.getElementById('feedback' + i).innerHTML = "<span class='incorrect'>Incorrect. Correct answer: <b>" + ansText[i - 1] + "</b></span>";
+        }
+      } else {
+        document.getElementById('feedback' + i).innerHTML = "<span class='incorrect'>Not answered. Correct answer: <b>" + ansText[i - 1] + "</b></span>";
+      }
+    }
+    
+    quizSubmitted = true;
+    clearInterval(timerInterval);
+    Array.from(document.querySelectorAll('input[type=radio]')).forEach(e => e.disabled = true);
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('disabled');
+    
+    // Exit fullscreen after submission
+    exitFullScreen();
+    
+    const name = document.getElementById('userName').value.trim();
+    const email = document.getElementById('userEmail').value.trim();
+    sendToFormspree(name, email, score, timeUsedMinutes);
+    
+    // Display comprehensive results
+    const percentage = ((score / 30) * 100).toFixed(1);
+    document.getElementById('result').innerHTML = `
+      <strong>Quiz Completed!</strong><br>
+      Your Score: <strong>${score} out of 30</strong> (${percentage}%)<br>
+      Questions Answered: ${answered} out of 30<br>
+      Time Used: ${timeUsedMinutes} minutes
+    `;
+    
+    // Scroll to results
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+  }
+  
+  window.onload = function() {
+    document.getElementById('quizContainer').style.display = 'none';
+    document.getElementById('introScreen').style.display = 'flex';
+  };
+</script>
+</body>
+</html>
